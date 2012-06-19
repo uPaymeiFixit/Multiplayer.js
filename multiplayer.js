@@ -49,9 +49,7 @@ Multiplayer = function( attached, callbacks, port, address )
 			// Remove client
 			this.on( "removeClient", function( client, id )
 			{
-				console.log("removeClient fired " + id);
 				if ( id >= this.id ) --id;
-				this.clients.splice(id,1);
 				this.ondisconnect( client, id );
 				this.id = id < this.id ? --this.id : this.id;
 			});
