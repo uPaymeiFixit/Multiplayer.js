@@ -27,4 +27,3 @@ onload = function() {
 };
 
 // https://github.com/uPaymeiFixit/Multiplayer.js
-$(".greenthing").fadeOut( 1000, this.remove() );
