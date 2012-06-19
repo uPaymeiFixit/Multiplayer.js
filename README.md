@@ -11,14 +11,14 @@ different.
 ### Setup ###
 
 Initiates a connection and sends the server "foo"
-
+```javascript
     m = new Multiplayer('foo');
-
+```
 Functionally identical to the above code, but broken up into two functions
-
+```javascript
     m = new Multiplayer();
     m.connect("foo");
-
+```
 Needs rewritten
 The Multiplayer function also has several optional parameters: ( ordered left to right)
 
@@ -43,64 +43,65 @@ the default socket.io SocketNamespace, with a few extra items for multiplayer
 ### Player data ###
 
 Updates your data 
-
+```javascript
     m.me == "foo"
-
+```
 Functionally identical to the above code  
-
+```javascript
     m.update( "foo" );
-
+```
 Connected clients are stored in an array  
-
+```javascript
     m.clients == ["bar","baz",...]
-    
+```
     
     
 ### Callbacks ###
 
 Called whenever m.clients is updated  
-
+```javascript
     m.receive = function( clients )
     {
     	clients == ["bar","baz",...]
     };
-
+```
 Called whenever a new client is added  
-
+```javascript
     m.onconnect = function( client )
     {
     	client == "qux"
     };
-
+```
 Called whenever a client disconnects  
-
+```javascript
     m.ondisconnect = function( client )
     {
     	client == "bar"
     };
-
+```
 Called whenever you reveive a message  
-
+```javascript
     m.onmessage = function( message )
     {
     	message == "Hello!"
     };
-    
+```
     
 ### Other functions and data ###
 
 Object that stores various socket options such as security  
-
+```javascript
     m.options
-
+```
 Broadcasts a message to all ohter clients, calls their onmessage() callback 
-
+```javascript
     m.send("Hello to you too!")
-
+```
 Pings the server  
-
+```javascript
     m.ping()
-
+```
 Time it took in milliseconds for the response to get back to the client 
-
+```javascript
     m.pingTime
+```
