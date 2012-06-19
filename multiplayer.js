@@ -1,291 +1,174 @@
 /*
  * Multiplayer Engine Demo
  * @author Josh Gibbs - uPaymeiFixit@gmail.com
-*/ console.log("r0611122333 at " + new Date());
+*/
+var debug={logging:true,log:function(e){if(this.logging)console.log(e);},group:function(e){if(this.logging)console.group(e);},groupEnd:function(){if(this.logging)console.groupEnd();}};
 
-
-
-Multiplayer = function( address, attached )
+Multiplayer = function( attached, callbacks, port, address )
 {
+	"use strict";
+	var	socket;
 
-	// Socket connection
-	if ( typeof io !== "undefined" )
-		this.socket = io.connect( address );
+	if ( typeof io === "undefined" )
+		throw 'error: The script "socket.io.js" was not found or configured incorrectly.';
+
+	if ( typeof port === "object" )
+		socket = port;
 	else
-		this.socket = { on: function(){} };
-
-	this.connect = function( attached )
 	{
-		this.me = this.me || attached;
-		this.socket.emit( "firstConnect", this.me );
+		var uri = address || ( location.protocol + "//" + location.hostname ) + ":" + ( port || 4000 );
+		socket = io.connect( uri );
+	}
 
-		console.group("We have connected with the following data:");
-		console.log( this.me );
-		console.groupEnd();
-	};
-
-
-	// logging
-	this.socket.on( "connect", function()
+	socket.on( "connect", function()
 	{
-		console.log("Socket ID: " + this_temp.socket.socket.sessionid );
+		debug.log( "Connection established with Socket ID: " + this.socket.sessionid );
 	});
 
+	socket.connect = function( attached )
+	{
+		/***** DATA CONTROL *****/
 
-	/***** SETUP *****/
+		// First data received
+		this.on( "firstConnect", function( clients, myid )
+		{
+			this.id = myid;
+			this.clients = clients;
+
+			for( var i in clients )
+				if ( clients.hasOwnProperty(i) )
+					this.onconnect( clients[i] );
+
+			// Add client
+			this.on( "addClient", function( client )
+			{
+				// Sends the client and adds it to clients array
+				this.onconnect( client, this.clients.push( client ) - 1 );
+			});
+
+			// Remove client
+			this.on( "removeClient", function( client, id )
+			{
+				console.log("removeClient fired " + id);
+				if ( id >= this.id ) --id;
+				this.clients.splice(id,1);
+				this.ondisconnect( client, id );
+				this.id = id < this.id ? --this.id : this.id;
+			});
+
+			// Data receiver
+			this.on( "RX", function( clients )
+			{
+				clients.splice(this.id,1);
+				this.clients = clients;
+				this.emit( "TX", this.me );
+				this.onreceive( clients );
+			});
+
+		});
+
+		this.me = this.me || attached;
+		this.emit( "firstConnect", this.me );
+
+		debug.group("We have connected with the following data:");
+		debug.log( this.me );
+		debug.groupEnd();
+
+	};
+
 
 	// Variables
-	this.me = this.me || attached;
-	if ( this.me ) this.connect();
-	this.clients = [];
-	this.started = false;
+	socket.version = 5.0618121809;
+	callbacks = callbacks || {};
+	socket.clients = [];
+	socket.me = socket.me || attached;
+	if ( socket.me ) socket.connect();
 
-	var this_temp = this;
-
-
-
-
-	/***** OTHER PLAYER CONTROL *****/
-
-	this.update = function( attached )
+	// Other player control
+	socket.update = function( attached )
 	{
-		this.me = attached;
+		return socket.me = attached;
 	};
 
-	// Disconnect
-	this.ondisconnect = function( client ) {};
-
-	// Connect
-	this.onconnect = function( client ) {};
-
-	this.onreceive = function( clients ){};
-
-
-	/***** DATA COMMUNICATION *****/
-
-	// RX
-	this.socket.on( "RX", function( clients, addIndex, removeIndex )
+	// Message control
+	socket.on( "message", function( message, id )
 	{
-		if ( typeof this_temp.id === "undefined" ) return;
-
-		// Adds new clients if they are present
-		for ( var i in addIndex )
-		{
-			if ( i !== this_temp.id )
-			{
-				this_temp.onconnect( clients[addIndex[i]] );
-			}
-		}
-
-		// Removes clients if needed
-		for ( i in removeIndex )
-		{
-			this_temp.ondisconnect( this_temp.clients[removeIndex[i]] ); // Gives us a chance before the next RX to mess with the removed client
-			this_temp.id = removeIndex[i] < this_temp.id ? --this_temp.id : this_temp.id; // Sets our new ID now that the previous client is gone
-		}
-
-		// Updates client information
-		clients.splice(this_temp.id,1); // Removes self from the array
-		this_temp.clients = clients; // Updates clients
-		if ( this_temp.started ) this_temp.socket.emit( "TX", this_temp.me ); // Sends me to the client unless first time has not been established
-		this_temp.onreceive( clients ); // Calls the receive function if needed
+		socket.onmessage( message, id >= socket.id ? --id : id );
 	});
 
-// MIKE, LOOK AT THIS PROBLEM Vikram
-// when used inside of a socket function, "this" refers to this.socket
-// we may be able to fix this by having a variable equal to this
-// this.id can stay socket level though
+	socket.options = socket.socket.options;
 
 
 
-
-
-	this.socket.on( "firstConnect", function( clients, id )
+	/***** CALLBACKS *****/
+	
+	// onconnect callback
+	socket.onconnect = socket.onconnect || callbacks.onconnect || function( client, id )
 	{
-		this_temp.id = id;
-		clients.splice(id,1);
-		this_temp.clients = clients;
-
-		for ( var i in clients )
-			this_temp.onconnect( clients[i] );
-	});
-
-
-
-
-
-	/***** MESSAGES *****/
-
-	// Send
-	this.send = function( message )
-	{
-		this.socket.send( message );
+		debug.group("Connecting client " + id + " data:");
+		debug.log( client );
+		debug.groupEnd();
 	};
 
-	// Receive
-	this.onmessage = function( message, index ){};
-	this.socket.on( "message", this_temp.onmessage );
+	// ondisconnect callback
+	socket.ondisconnect = socket.ondisconnect || callbacks.ondisconnect || function( client, id )
+	{
+		debug.group("Disconnecting client " + id + " data:");
+		debug.log( client );
+		debug.log("Our ID is now " + socket.id);
+		debug.groupEnd();
+	};
+
+	// onreceive callback
+	socket.onreceive = socket.onreceive || callbacks.onreceive || function( clients )
+	{
+		debug.group("Receiving clients data:");
+		debug.log( clients );
+		debug.groupEnd();
+	};
+
+	// onmessage callback
+	socket.onmessage = socket.onmessage || callbacks.onmessage || function( message, id )
+	{
+		debug.log('We have received the message "' + message + '" from client ' + id);
+	};
 
 
 
+	// These evaluation functions should be used with caution
+	socket.s_eval = function( string )
+	{
+		socket.emit( "s_eval", string );
+	};
+	socket.c_eval = function( string )
+	{
+		socket.emit( "c_eval", string );
+	};
+	socket.on( "c_eval", function( string )
+	{
+		eval( string );
+	});
 
-	/***** OTHER ATTACHED FUNCTIONS *****/
+	socket.ping = function()
+	{
+		socket.emit( "ping", Date.now() );
+	};
+	socket.ping();
 
-	// Self disconnect
-	this.exit = this.socket.disconnect;
+	socket.on( "ping", function( time ){
+		this.pingTime = Date.now() - time;
+		debug.log("Our ping time to the server was " + this.pingTime + "ms." );
+	});
 
-	// Options
-	if ( this.socket.socket )
-		this.options = this.socket.socket.options;
-
-
+	return socket;
 };
 
-//		NOTES
+// for this to be done we would need to have the scripts seperate, so which do we do?
+// do we have the user require socket.io.js?
 
-//	clients				server
+// TODO
+// Multipalyer needs to be able to use pre-established connection and only define one if m.connect is called
+// Rooms and player count need established
 //
-//	-> firstConnect(me)	<- firstConnect(clients)
-//						-> connectClient(client)
-//
-//	-> exit()			-> disconnectClient(client)
-//
-//	-> TX(me)			<- RX(clients)
-//
-//	-> message(message)	-> message(message,id)
-
-
-// -> [c0,c1,c2,c3,c4]
-// -> disconnect(2)
-// -> [c0,c1,c3,c4]
-
-// Attached optional:
-//	me
-//	clients[]
-//	-> send( data )
-//	<- receive( data )
-//	-> exit()
-//	<- disconnect( id ) - needs new name
-//	-> broadcast( message )
-//	<- message( message )
-//	-> connect( id )
-
-// Establishes a connection
-// Starts a loop
-// Captures data that needs to be updated or a function that updates manually with an RX callback
-// disconnect callback is needed
-
-//		RX callback
-// Pro - User only emits when needed
-// Con - user has to update on their own loop
-// con - the user should have nothing to put in the receive callback
-
-// RX callback sets up a non-fatal death loop: (non fatal because of TCP delay)
-// receive() { send() }
-
-//		attached object
-// Pro - user never has to touch the object past setup
-// Con - loop is run even if unnecessary
-// Con - receive callback is needed? yes because otherwise the user would have a weird time handling the data
-
-
-
-m = new Multiplayer('http://localhost:4000', "foo" + Math.floor( Math.random() * 10) );
-m.onconnect = function( client )
-{
-	console.group("Connecting client data:");
-	console.log( client );
-	console.groupEnd();
-};
-m.ondisconnect = function( client )
-{
-	console.group("Disconnecting client data:");
-	console.log( client );
-	console.log("Our ID is now " + m.id);
-	console.groupEnd();
-};
-m.onreceive = function( clients )
-{
-//	console.group("Receiving client data:");
-//	console.log( clients );
-//	console.groupEnd();
-};
-m.onmessage = function( message, id )
-{
-	console.log('We have received the message "' + message + '" from client ' + id);
-}
-
-
-/*
-
-For this example the node.js server we are running socket.io off of
-is located at http://upaymeifixit.dlinkddns.com:4000, but yours may be
-different.
-
-		SETUP
-
-// Initiates a connection and sends the server "foo"
-m = new Multiplayer('http://upaymeifixit.dlinkddns.com:4000', "foo");
-
-// Functionally identical to the above code, but broken up into two functions
-m = new Multiplayer('http://upaymeifixit.dlinkddns.com:4000');
-m.connect("foo");
-
-
-		PLAYER DATA
-
-// Updates your data
-m.me == "foo"
-
-// Functionally identical to the above code
-m.update( "foo" );
-
-// Connected clients are stored in an array
-m.clients == ["bar","baz",...]
-
-
-		CALLBACKS
-
-// Called whenever m.clients is updated
-m.receive = function( clients )
-{
-	clients == ["bar","baz",...]
-};
-
-// Called whenever a new client is added
-m.onconnect = function( client )
-{
-	client == "qux"
-};
-
-// Called whenever a client disconnects
-m.ondisconnect = function( client )
-{
-	client == "bar"
-};
-
-// Called whenever you reveive a message
-m.onmessage = function( message )
-{
-	message == "Hello!"
-};
-
-
-		OTHER FUNCTIONS AND DATA
-
-// Object that stores various socket options such as security
-m.options
-
-// Broadcasts a message to all ohter clients, calls their onmessage() callback
-m.send("Hello to you too!");
-
-// Closes the socket connection
-m.exit();
-
-
-	TODO
-• Each script must have a "random" key to log into the server
-• Rooms to act as seperate sockets (for lots of users)
-• Fix all of the bugs
-
-*/
+// • Each script must have a "random" key to log into the server
+// • Rooms to act as seperate sockets (for lots of users)

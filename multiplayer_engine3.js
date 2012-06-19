@@ -70,6 +70,7 @@ var port = 4000,
 
 			return socket.on( "disconnect", function()
 			{
+				socket.broadcast.emit( "removeClient", client[cID[socket.id]], cID[socket.id] );
 				console.log("Client with SID: " + socket.id + " and CID: " + cID[socket.id] + " is disconnecting.");
 				
 				clients.splice(cID[socket.id],1);

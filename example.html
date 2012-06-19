@@ -1,0 +1,57 @@
+<html>
+	<head>
+		<title>Multiplayer.js example</title>
+
+		<script src="http://gibbs.tk:4000/socket.io/socket.io.js"></script>
+		<script src="multiplayer.js"></script>
+	</head>
+	<style>
+		span {
+			width: 10px;
+			height: 10px;
+			background-color: red;
+			position: absolute;
+		}
+		div {
+			width: 10px;
+			height: 10px;
+			background-color: red;
+			position: absolute;
+		}
+	</style>
+	<body>
+		<span id="me"></span>
+		<script type="text/javascript">
+			onload = function() {
+
+				var mul = new Multiplayer({ x:0, y:0 }, {
+					onconnect: function( client, id ) {
+						console.group("connect " + id)
+						console.log(client)
+						console.groupEnd()
+						document.body.appendChild( document.createElement( "div" ) )
+					},
+					ondisconnect: function( client, id ) {
+						console.group("disconnect " + id)
+						console.log(client)
+						console.groupEnd()
+						document.removeChild( document.getElementsByTagName("div")[id] )
+					},
+					onreceive: function( clients ) {
+						for( var i in clients ) {
+							document.getElementsByTagName("div")[i].style.left = clients[i].x
+							document.getElementsByTagName("div")[i].style.top = clients[i].y
+						}
+					}
+				});
+
+				addEventListener( "mousemove", function( event ) {
+					mul.update({ x:event.pageX, y:event.pageY })
+					document.getElementById("me").style.left = mul.me.x
+					document.getElementById("me").style.top = mul.me.y
+				});
+
+			}
+		</script>
+	</body>
+</html>
