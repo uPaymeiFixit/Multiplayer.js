@@ -9,7 +9,7 @@ For this example the node.js server we are running socket.io off of is located a
 ### Installation ###
 
 Multiplayer.js requires that you have a socket.io server running on node.js.  
-To view installation guides for these visit [nodejs.org][1] and [Socket.IO](http://socket.io/#how-to-use)
+To view installation guides for these visit [nodejs.org](http://nodejs.org/) and [Socket.IO](http://socket.io/#how-to-use)
 
 Include the necessary scripts in your HTML
 ```html
