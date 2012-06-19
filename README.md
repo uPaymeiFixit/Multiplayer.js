@@ -12,11 +12,11 @@ different.
 
 Initiates a connection and sends the server "foo"
 ```javascript
-    m = new Multiplayer('foo');
+    var m = new Multiplayer('foo');
 ```
 Functionally identical to the above code, but broken up into two functions
 ```javascript
-    m = new Multiplayer();
+    var m = new Multiplayer();
     m.connect("foo");
 ```
 Needs rewritten
