@@ -27,14 +27,28 @@ can be accessed through com.me and changed with com.update( attached )
 
 @param callbacks : callback object that contains functions that will be called
 after specific events fire. onconnect, ondisconnect, onreceive, onmessage
+```javascript
+    m = new Multiplayer( "foo", {
+        onmessage = function( message, id ) {
+            alert( "Client " + id + " says " + message )
+        }
+    })
+```
 
 @param port_or_socket : can be used as either a socket that you have already setup
 using io.connect, or a port for the specific location you need to connect to. the
 default is 4000
+```javascript
+    var socket = io.connect( "http://gibbs.tk:4000" )
+    var m = new Multiplayer( "foo", null, socket )
+```
 
 @param address : string containing the address that you want the socket to attempt
 to connect to. By default it will try to connect to the host of the current page
 on port 4000
+```javascript
+    var m = new Multiplayer( "foo", null, 4000, "http://gibbs.tk" )
+```
 
 m will be returned back as a SocketNamespace, with all of the properties of
 the default socket.io SocketNamespace, with a few extra items for multiplayer
@@ -81,9 +95,10 @@ Called whenever a client disconnects
 ```
 Called whenever you reveive a message  
 ```javascript
-    m.onmessage = function( message )
+    m.onmessage = function( message, id )
     {
     	message == "Hello!"
+        id == (an index )
     };
 ```
     
