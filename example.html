@@ -6,13 +6,7 @@
 		<script src="multiplayer.js"></script>
 	</head>
 	<style>
-		span {
-			width: 10px;
-			height: 10px;
-			background-color: red;
-			position: absolute;
-		}
-		div {
+		span, div {
 			width: 10px;
 			height: 10px;
 			background-color: red;
@@ -24,27 +18,30 @@
 		<script type="text/javascript">
 			onload = function() {
 
+				// Sets up and connects to the multiplayer server
 				var mul = new Multiplayer({ x:0, y:0 }, {
+
+					// Adds squares when other players connect
 					onconnect: function( client, id ) {
-						console.group("connect " + id)
-						console.log(client)
-						console.groupEnd()
 						document.body.appendChild( document.createElement( "div" ) )
 					},
+
+					// Removes squares when other players disconnect
 					ondisconnect: function( client, id ) {
-						console.group("disconnect " + id)
-						console.log(client)
-						console.groupEnd()
-						document.removeChild( document.getElementsByTagName("div")[id] )
+						document.body.removeChild( document.getElementsByTagName("div")[id] )
 					},
+
+					// Updates player locations when we receive their data
 					onreceive: function( clients ) {
 						for( var i in clients ) {
 							document.getElementsByTagName("div")[i].style.left = clients[i].x
 							document.getElementsByTagName("div")[i].style.top = clients[i].y
 						}
 					}
+
 				});
 
+				// Updates mul.me and square position on the screen
 				addEventListener( "mousemove", function( event ) {
 					mul.update({ x:event.pageX, y:event.pageY })
 					document.getElementById("me").style.left = mul.me.x
