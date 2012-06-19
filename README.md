@@ -69,11 +69,11 @@ The third parameter can be used in two ways. It can be used to attach the Multip
 
 Updates your data 
 ```javascript
-    m.me == "foo"
+    m.me = "newfoo"
 ```
 Functionally identical to the above code  
 ```javascript
-    m.update( "foo" );
+    m.update( "newfoo" );
 ```
 Connected clients are stored in an array  
 ```javascript
@@ -109,7 +109,7 @@ Called whenever you reveive a message
     m.onmessage = function( message, id )
     {
     	message == "Hello!"
-        id == (an index )
+        id == (an index of m.clients)
     };
 ```
     
