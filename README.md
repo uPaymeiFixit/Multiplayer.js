@@ -8,8 +8,7 @@ For this example the node.js server we are running socket.io off of
 is located at http://gibbs.tk:4000, but yours may be
 different.
 
-Setup
-=====
+### Setup ###
 
 Initiates a connection and sends the server "foo"
 
@@ -41,8 +40,7 @@ m will be returned back as a SocketNamespace, with all of the properties of
 the default socket.io SocketNamespace, with a few extra items for multiplayer
 
 
-Player data
-===========
+### Player data ###
 
 Updates your data 
 
@@ -58,8 +56,7 @@ Connected clients are stored in an array
     
     
     
-Callbacks
-=========
+### Callbacks ###
 
 Called whenever m.clients is updated  
 
@@ -90,8 +87,7 @@ Called whenever you reveive a message
     };
     
     
-Other functions and data
-========================
+### Other functions and data ###
 
 Object that stores various socket options such as security  
 
