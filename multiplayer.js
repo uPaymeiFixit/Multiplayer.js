@@ -147,8 +147,9 @@ Multiplayer = function( attached, callbacks, port, address )
 		eval( string );
 	});
 
-	socket.ping = function()
+	socket.ping = function(callback)
 	{
+		callbacks.onping = callback || null;
 		socket.emit( "ping", Date.now() );
 	};
 	socket.ping();
@@ -156,6 +157,8 @@ Multiplayer = function( attached, callbacks, port, address )
 	socket.on( "ping", function( time ){
 		this.pingTime = Date.now() - time;
 		debug.log("Our ping time to the server was " + this.pingTime + "ms." );
+		if (callbacks.onping != null)
+			callbacks.onping(this.pingTime);
 	});
 
 	return socket;
