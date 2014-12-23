@@ -125,9 +125,16 @@ Broadcasts a message to all ohter clients, calls their onmessage() callback
 ```
 Pings the server  
 ```javascript
-    m.ping()
+    m.ping([callbackFunction])
 ```
 Time it took in milliseconds for the response to get back to the client 
 ```javascript
     m.pingTime
+```
+
+If a callback function is passed, it will call that function, passing in m.pingTime
+```javascript
+    callbackFunction(pingTime) {
+        console.log(pingTime);
+    }
 ```
