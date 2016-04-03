@@ -1,0 +1,28 @@
+{
+  "name": "multiplayer.js",
+  "version": "1.0.0",
+  "description": "Simple Multiplayer API that uses Socket.IO",
+  "main": "multiplayer_server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/uPaymeiFixit/Multiplayer.js.git"
+  },
+  "keywords": [
+    "multiplayer",
+    "javascript",
+    "multiplayer",
+    "engine",
+    "easy",
+    "fast",
+    "prototyping"
+  ],
+  "author": "Josh Gibbs",
+  "license": "GPL-2.0",
+  "bugs": {
+    "url": "https://github.com/uPaymeiFixit/Multiplayer.js/issues"
+  },
+  "homepage": "https://github.com/uPaymeiFixit/Multiplayer.js#readme"
+}
